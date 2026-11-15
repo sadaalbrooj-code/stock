@@ -76,17 +76,30 @@ function fill(k){const tb=document.getElementById("tb");tb.innerHTML="";let n=0,
   tr=tb.insertRow();tr.className="st";tr.innerHTML=`<td></td><td>مجموع ${s}</td><td></td><td></td><td></td><td class="n">${fmt(sq)}</td><td></td><td></td><td></td><td class="n">${fmt(sv)}</td><td></td>`}
  if(!n){const tr=tb.insertRow(),td=tr.insertCell();td.colSpan=11;td.textContent="ماكو موديلات تطابق البحث"}
  k1.textContent=fmt(Q);k2.textContent=fmt(V);k3.textContent=fmt(S);k4.textContent=A}
-function loadX(){return window.XLSX?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+function loadX(){return window.ExcelJS?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js";s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
 async function excel(k,title){try{await loadX()}catch(e){return alertBox("مكتبة Excel ما تحملت، تأكد من الانترنت وحاول مرة ثانية.")}
- const ds=(DATA.updated||"").slice(0,10),aoa=[[title+" - صدى البروج - "+ds],["#","الموديل","المخزن الرئيسي","المعرض","Head Office","الرصيد الكلي","سعر البيع","سعر الشراء المسجل","معدل التكلفة الحقيقي","القيمة بمعدل التكلفة","ملاحظة"]];let n=0,TQ=0,TV=0;
- for(const[s,its]of visible(k)){aoa.push([s]);let sq=0,sv=0;for(const i of its){n++;const w=wac(i);aoa.push([n,i.n,i.m,i.sh,i.ho,i.s,i.sr?Math.round(i.sr):"",Math.round(i.pr),w?Math.round(w):"",Math.round(i.av||0),note(i)]);if(i.s>0){sq+=i.s;sv+=i.av||0}}
-  aoa.push(["","مجموع "+s,"","","",sq,"","","",Math.round(sv),""],[]);TQ+=sq;TV+=sv}
- aoa.push(["","المجموع الكلي","","","",TQ,"","","",Math.round(TV),""]);
- const ws=XLSX.utils.aoa_to_sheet(aoa);ws["!cols"]=[5,40,13,10,12,11,13,16,17,18,24].map(w=>({wch:w}));ws["!merges"]=[{s:{r:0,c:0},e:{r:0,c:10}}];
- const wb=XLSX.utils.book_new();wb.Workbook={Views:[{RTL:true}]};XLSX.utils.book_append_sheet(wb,ws,"Stock");
- const blob=new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),fn=k+"_stock_"+ds+".xlsx";
+ const ds=(DATA.updated||"").slice(0,10),F="Arial",RED="FFC00000",thin={style:"thin",color:{argb:"FFBFBFBF"}},B={top:thin,left:thin,bottom:thin,right:thin};
+ const fill=c=>({type:"pattern",pattern:"solid",fgColor:{argb:c}}),C=11,NUM="#,##0";
+ const H=["#","الموديل","المخزن الرئيسي","المعرض","Head Office","الرصيد الكلي","سعر البيع","سعر الشراء المسجل","معدل التكلفة الحقيقي","القيمة بمعدل التكلفة","ملاحظة"];
+ const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet("Stock",{views:[{rightToLeft:true,state:"frozen",ySplit:1}]});
+ ws.columns=[5,40,13,10,12,12,13,16,17,19,24].map(w=>({width:w}));
+ ws.mergeCells(1,1,1,C);let c=ws.getCell(1,1);c.value=title+" — صدى البروج — "+ds;c.font={name:F,size:14,bold:true,color:{argb:"FFFFFFFF"}};c.fill=fill(RED);c.alignment={horizontal:"center",vertical:"middle"};ws.getRow(1).height=30;
+ let r=3,n=0;const subs=[];
+ for(const[s,its]of visible(k)){c=ws.getCell(r,1);c.value=s;c.font={name:F,size:12,bold:true,color:{argb:RED}};r++;
+  H.forEach((t,x)=>{const c=ws.getCell(r,x+1);c.value=t;c.font={name:F,bold:true,color:{argb:"FFFFFFFF"}};c.fill=fill("FF404040");c.border=B;c.alignment={horizontal:"center",vertical:"middle",wrapText:true}});ws.getRow(r).height=30;r++;const st=r;
+  for(const i of its){n++;const w=wac(i),nt=note(i);const v=[n,i.n,i.m,i.sh,i.ho,i.s,i.sr?Math.round(i.sr):null,Math.round(i.pr)||null,w?Math.round(w):null,Math.round(i.av||0),nt];
+   v.forEach((x,ci)=>{const c=ws.getCell(r,ci+1);c.value=x;c.border=B;c.font={name:F,bold:ci===5||ci===8,color:{argb:ci===10&&nt&&!/صفر/.test(nt)?RED:"FF000000"}};c.alignment={horizontal:ci===1||ci===10?"right":"center",vertical:"middle"};if(ci>=2&&ci<=9)c.numFmt=NUM;if(!i.s)c.fill=fill("FFFDE2E2")});r++}
+  const en=r-1;["","مجموع "+s].forEach((t,x)=>{ws.getCell(r,x+1).value=t});
+  [3,4,5,6,10].forEach(ci=>{const L=String.fromCharCode(64+ci);ws.getCell(r,ci).value={formula:`SUM(${L}${st}:${L}${en})`};ws.getCell(r,ci).numFmt=NUM});
+  for(let ci=1;ci<=C;ci++){const c=ws.getCell(r,ci);c.font={name:F,bold:true};c.fill=fill("FFF2F2F2");c.border=B;c.alignment={horizontal:ci===2?"right":"center",vertical:"middle"}}
+  subs.push(r);r+=2}
+ ws.getCell(r,2).value="المجموع الكلي";[3,4,5,6,10].forEach(ci=>{const L=String.fromCharCode(64+ci);ws.getCell(r,ci).value={formula:subs.map(x=>L+x).join("+")||"0"};ws.getCell(r,ci).numFmt=NUM});
+ for(let ci=1;ci<=C;ci++){const c=ws.getCell(r,ci);c.font={name:F,bold:true,size:12,color:{argb:"FFFFFFFF"}};c.fill=fill(RED);c.border=B;c.alignment={horizontal:ci===2?"right":"center",vertical:"middle"}}
+ c=ws.getCell(r+2,2);c.value="معدل التكلفة الحقيقي = قيمة المخزون بزوهو ÷ الرصيد. سعر الشراء المسجل = السعر الافتراضي بالمادة. الأسطر الوردية: رصيدها صفر.";c.font={name:F,italic:true,color:{argb:"FF666666"}};
+ ws.pageSetup={orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:0};
+ const blob=new Blob([await wb.xlsx.writeBuffer()],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),fn=k+"_stock_"+ds+".xlsx";
  const d=window.claude?await claude.use("downloads").catch(()=>null):null;
- if(d){try{await d.save({filename:fn,data:blob})}catch(e){}}else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fn;a.click()}}
+ if(d){try{await d.save({filename:fn,data:blob})}catch(e){}}else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();a.remove()}}
 function alertBox(t){const m=document.createElement("div");m.className="msg";m.textContent=t;document.getElementById("app").prepend(m)}
 function route(){const k=location.hash.slice(1);k?brand(k):home();window.scrollTo(0,0)}
 const enc=new TextEncoder(),ub=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
