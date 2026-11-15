@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>مخزون صدى البروج</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--ink:#1d1d1f;--mut:#6b6b70;--line:#e4e2dc;--acc:#b3261e;--accs:#fbeceb;--sec:#efede8;--warn:#a15c00;--warns:#fff4e0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141416;--card:#1d1d20;--ink:#ececee;--mut:#9a9aa1;--line:#2e2e33;--acc:#ff6b5e;--accs:#3a1d1b;--sec:#26262a;--warn:#f0b35a;--warns:#3a2c14}}
+:root[data-theme="dark"]{--bg:#141416;--card:#1d1d20;--ink:#ececee;--mut:#9a9aa1;--line:#2e2e33;--acc:#ff6b5e;--accs:#3a1d1b;--sec:#26262a;--warn:#f0b35a;--warns:#3a2c14}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic",Arial,sans-serif;font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+h1{margin:0;font-size:22px}h1 a{color:inherit;text-decoration:none}h1 span{color:var(--acc)}.sub{color:var(--mut);font-size:13px;margin-top:4px}
+button,input{font:inherit}button{font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:8px;cursor:pointer}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.brand{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;cursor:pointer;text-align:right;display:block;width:100%}
+.brand:hover{border-color:var(--acc)}.brand h2{margin:0 0 10px;font-size:19px}.brand .row{display:flex;justify-content:space-between;color:var(--mut);font-size:13px;margin-top:4px}.brand .row b{color:var(--ink);font-variant-numeric:tabular-nums}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.tools input[type=search]{flex:1;min-width:180px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+.tools label{color:var(--mut);font-size:13px;display:flex;gap:6px;align-items:center}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}.kpi b{display:block;font-size:19px;font-variant-numeric:tabular-nums}.kpi small{color:var(--mut)}
+.msg{padding:10px 14px;border-radius:8px;margin-bottom:12px;background:var(--warns);color:var(--warn)}
+.tw{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:900px}th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{background:var(--card);color:var(--mut);font-weight:600;font-size:12px}td.n{font-variant-numeric:tabular-nums;text-align:left}
+tr.sec td{background:var(--sec);font-weight:700}tr.st td{font-weight:700;border-bottom:2px solid var(--line)}tr.zero td{color:var(--mut)}
+td.w{color:var(--acc);background:var(--accs)}td.note{color:var(--mut);font-size:12px}
+.login{max-width:360px;margin:12vh auto 0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px}.login form{display:grid;gap:10px;margin-top:16px}.login input:not([type=checkbox]){padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}.rem{color:var(--mut);font-size:13px;display:flex;gap:6px;align-items:center}
+</style></head><body><div class="wrap" id="app"><div class="sub">جاري التحميل…</div></div>
+<script>
+const BRANDS=[
+ {k:"dahua",t:"Dahua داهوا"},{k:"hik",t:"Hikvision / HiLook"},{k:"ezviz",t:"EZVIZ"},{k:"tprouter",t:"TP-Link راوترات"},{k:"tplink",t:"TP-Link (بقية المنتجات)"},
+ {k:"tecsa",t:"TECSA تيكسا"},{k:"power",t:"UPS وبطاريات وطاقة"},{k:"cables",t:"كيبلات واكسسوارات"},{k:"other",t:"مواد أخرى"}];
+const T=s=>s.toUpperCase().replace(/\s+/g," ");
+function classify(n){const u=T(n);
+ if(/TECSA|TCS[-\s\[]|BS-1500/.test(u))return["tecsa",/K\.?B|K0B|KEYBOARD/.test(u)?"كيبوردات":/MOUSE/.test(u)?"ماوسات":/HEAD|SPEAKER|BH2/.test(u)?"سماعات":"أخرى"];
+ if(/^(DH|DAHUA|DHI)[\s-]|^DAHUA|^XVR|^1200CLQ|^1209|^1509TP|^180[19]|^KIT-1500|^NVR ?4116HS|^NVR4104-4KS3/.test(u))return["dahua",dahuaSec(u)];
+ if(/^THC-|^DVR-2|^IK-|^TK-|^KIT R3104/.test(u))return["hik",/^DVR/.test(u)?"أجهزة تسجيل DVR":/KIT/.test(u)?"كتات":"كاميرات"];
+ if(/^CS-|^EZVIZ/.test(u))return["ezviz",/RAM/.test(u)?"ذواكر":"كاميرات"];
+ if(/^TL[-\s]|^TP[-\s]?LINK|^TPLINK|ARCHER|DECO|^EAP|^LS1|^SG ?2|^ES2|^RP108|VIG[IE]|^TABO|^NVR ?[12]\d|^NVR1|^TP LINK/.test(u)){const s=tpSec(u);return[s==="راوترات"||s==="Deco"?"tprouter":"tplink",s]}
+ if(/^CABLE/.test(u)&&/UPS/.test(u))return["cables","اكسسوارات"];
+ if(/UPS|BATT|BATTER|INVERTER|ANVERTER|GROWATT|DEYE|LONG[IL]|GOGO POWER|ADAPTER|ADEPTER|ADPTER|CHARGER|محولة|^5A 12V|^120W|POWER SUPLE|BLITHUM|SENPUTE|MAXMA|POE-UPS|^V500SE/.test(u))return["power",/UPS/.test(u)&&!/BATT/.test(u)?"UPS":/BATT|BLITHUM|SENPUTE|MAXMA/.test(u)?"بطاريات":/INVERTER|ANVERTER|GROWATT|DEYE|LONG|GOGO/.test(u)?"انفرترات وألواح":"أدابترات وشواحن"];
+ if(/CABLE|ABLE CAT|^DC|BNC|فيش|BRACKET|BRAKET|ستاند|BOX|بوكس|CONCTER|CONNECTOR|CONERTOR|HDMI|HDML|SPLITER|EXTENDER|^RAK|RACK|كيبل|TOOL CABLE|STS FAST|PLASTIC HOOK|E U PLUG|WI-FI ANTENNA|FAST (BLUE|GREEN)/.test(u))return["cables",/HDMI|HDML|HD |SPLITER|EXTENDER/.test(u)?"HDMI وموسعات":!/CABLE|ABLE CAT/.test(u)?"اكسسوارات":/FTTH|FTHH|FIBER/.test(u)?"كيبلات فايبر":/RG ?59|CAMERA|CAM |CARBON 250|C3$|C3 قظري|CARBON قطري|NEXXT قطري|خشب|خاكي|رصاصي/.test(u)?"كيبلات كاميرات":/^DC|DC /.test(u)?"اكسسوارات":"كيبلات شبكة"];//"HDMI وموسعات":/FTTH|FTHH|FIBER/.test(u)?"كيبلات فايبر":/RG ?59|CAMERA|CAM |CARBON 250|C3$|C3 قظري|CARBON قطري|NEXXT قطري|خشب|خاكي|رصاصي/.test(u)?"كيبلات كاميرات":/CABLE|ABLE/.test(u)&&!/^DC|DC /.test(u)?"كيبلات شبكة":"اكسسوارات"];
+ return["other",/HARD|HAED|WD |^WD|TOSHIBA|RAM|TF-SD|DOCKING/.test(u)?"هاردات وذواكر":/ONT|ONU|ELYX|UBNT|LAN725/.test(u)?"فايبر وشبكات":"متفرقات"]}
+function dahuaSec(u){if(/KIT/.test(u))return"كتات";if(/NVR/.test(u))return"أجهزة تسجيل NVR";if(/XVR|1B16/.test(u))return"أجهزة تسجيل XVR";
+ if(/IPC|IPS|[-\s]IP[-\s]|2449|1249|1549|1639|2649|2849|1839/.test(u))return"كاميرات IP";if(/18\d\d/.test(u))return"كاميرات أنالوك 4K / 8MP";if(/15\d\d/.test(u))return"كاميرات أنالوك 5MP";return"كاميرات أنالوك 2MP"}
+function tpSec(u){if(/VIG|^NVR/.test(u))return"VIGI كاميرات وتسجيل";if(/DECO/.test(u))return"Deco";if(/^EAP/.test(u))return"Access Point (EAP)";
+ if(/WA8|RE ?8|EXTENDER/.test(u))return"مقويات";if(/^TL-S|^LS1|^SG|^ES2|^RP108|TL -1009/.test(u))return"سويجات";if(/TABO/.test(u))return"أخرى";return"راوترات"}
+const SORD={tprouter:["راوترات","Deco"],tplink:["سويجات","Access Point (EAP)","VIGI كاميرات وتسجيل","مقويات"],dahua:["كاميرات أنالوك 2MP","كاميرات أنالوك 5MP","كاميرات أنالوك 4K / 8MP","كاميرات IP","كتات","أجهزة تسجيل XVR","أجهزة تسجيل NVR"]};
+const fmt=v=>v==null||isNaN(v)?"—":Math.round(v).toLocaleString("en-US");
+let DATA=null,showZero=false,q="";
+const wac=i=>i.s>0&&i.av>0?i.av/i.s:null;
+function note(i){if(i.err)return"ما تحدثت تفاصيلها";if(i.s<0)return"رصيد سالب";if(!i.s)return"رصيد صفر";const w=wac(i);if(w&&i.pr&&Math.abs(i.pr-w)/w>0.15)return i.pr>w?"سعر الشراء أعلى من المعدل":"سعر الشراء أقل من المعدل";if(i.sr&&w&&i.sr<w)return"سعر البيع أقل من التكلفة";return""}
+function groups(k){const g={};for(const i of DATA.items){const[b,s]=classify(i.n);if(b!==k)continue;(g[s]=g[s]||[]).push(i)}
+ const order=Object.keys(g).sort((a,b)=>{const o=SORD[k]||[];const ia=o.indexOf(a),ib=o.indexOf(b);return(ia<0?99:ia)-(ib<0?99:ib)||(a==="أخرى"||a==="متفرقات")-(b==="أخرى"||b==="متفرقات")||a.localeCompare(b,"ar")});
+ return order.map(s=>[s,g[s].sort((a,b)=>a.n.localeCompare(b.n))])}
+function stamp(){return DATA?"آخر تحديث من Zoho: "+new Date(DATA.updated).toLocaleString("ar-IQ",{dateStyle:"medium",timeStyle:"short"}):""}
+function home(){const app=document.getElementById("app");
+ let h=`<header><div><h1>مخزون <span>صدى البروج</span></h1><div class="sub">${stamp()}</div></div></header><div class="grid">`;
+ for(const b of BRANDS){let n=0,q=0,v=0;for(const[,its]of groups(b.k))for(const i of its){if(i.s>0){n++;q+=i.s;v+=i.av||i.s*i.pr}}
+  h+=`<button class="brand" data-k="${b.k}"><h2>${b.t}</h2><div class="row">موديلات متوفرة<b>${n}</b></div><div class="row">عدد القطع<b>${fmt(q)}</b></div><div class="row">القيمة (د.ع)<b>${fmt(v)}</b></div></button>`}
+ app.innerHTML=h+"</div>";app.querySelectorAll(".brand").forEach(e=>e.onclick=()=>{location.hash=e.dataset.k})}
+function brand(k){const b=BRANDS.find(x=>x.k===k);if(!b)return home();const app=document.getElementById("app");
+ app.innerHTML=`<header><div><h1><a href="#">المخزون</a> ← <span>${b.t}</span></h1><div class="sub">${stamp()}</div></div><button class="pri" id="dl">تنزيل Excel</button></header>
+ <div class="tools"><button id="back">← كل البراندات</button><input type="search" id="q" placeholder="ابحث عن موديل…" value="${q.replace(/"/g,"")}"><label><input type="checkbox" id="z" ${showZero?"checked":""}> إظهار الموديلات اللي رصيدها صفر</label></div>
+ <div class="kpis"><div class="kpi"><small>عدد القطع</small><b id="k1"></b></div><div class="kpi"><small>القيمة بمعدل التكلفة</small><b id="k2"></b></div><div class="kpi"><small>القيمة بسعر الشراء المسجل</small><b id="k3"></b></div><div class="kpi"><small>موديلات متوفرة</small><b id="k4"></b></div></div>
+ <div class="tw"><table><thead><tr><th>#</th><th>الموديل</th><th>المخزن الرئيسي</th><th>المعرض</th><th>Head Office</th><th>الرصيد الكلي</th><th>سعر البيع</th><th>سعر الشراء المسجل</th><th>معدل التكلفة الحقيقي</th><th>القيمة بمعدل التكلفة</th><th>ملاحظة</th></tr></thead><tbody id="tb"></tbody></table></div>`;
+ back.onclick=()=>{location.hash=""};document.getElementById("q").oninput=e=>{q=e.target.value;fill(k)};z.onchange=e=>{showZero=e.target.checked;fill(k)};dl.onclick=()=>excel(k,b.t);fill(k)}
+function visible(k){const f=q.trim().toUpperCase();return groups(k).map(([s,its])=>[s,its.filter(i=>(showZero||i.s!==0)&&(!f||i.n.toUpperCase().includes(f)))]).filter(([,its])=>its.length)}
+function fill(k){const tb=document.getElementById("tb");tb.innerHTML="";let n=0,Q=0,V=0,S=0,A=0;
+ for(const[s,its]of visible(k)){let tr=tb.insertRow();tr.className="sec";let td=tr.insertCell();td.colSpan=11;td.textContent=s;let sq=0,sv=0;
+  for(const i of its){n++;const w=wac(i),nt=note(i),val=i.av||0;tr=tb.insertRow();if(!i.s)tr.className="zero";
+   [n,i.n,fmt(i.m),fmt(i.sh),fmt(i.ho),fmt(i.s),i.sr?fmt(i.sr):"—",fmt(i.pr),fmt(w),fmt(val),nt].forEach((c,x)=>{const d=tr.insertCell();d.textContent=c;if(x>=2&&x<=9)d.className="n";if(x==10)d.className="note";if(x==8&&nt.includes("المعدل"))d.classList.add("w");if(x==6&&nt.includes("البيع"))d.classList.add("w")});
+   if(i.s>0){sq+=i.s;sv+=val;Q+=i.s;V+=val;S+=i.s*i.pr;A++}}
+  tr=tb.insertRow();tr.className="st";tr.innerHTML=`<td></td><td>مجموع ${s}</td><td></td><td></td><td></td><td class="n">${fmt(sq)}</td><td></td><td></td><td></td><td class="n">${fmt(sv)}</td><td></td>`}
+ if(!n){const tr=tb.insertRow(),td=tr.insertCell();td.colSpan=11;td.textContent="ماكو موديلات تطابق البحث"}
+ k1.textContent=fmt(Q);k2.textContent=fmt(V);k3.textContent=fmt(S);k4.textContent=A}
+function loadX(){return window.XLSX?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+async function excel(k,title){try{await loadX()}catch(e){return alertBox("مكتبة Excel ما تحملت، تأكد من الانترنت وحاول مرة ثانية.")}
+ const ds=(DATA.updated||"").slice(0,10),aoa=[[title+" - صدى البروج - "+ds],["#","الموديل","المخزن الرئيسي","المعرض","Head Office","الرصيد الكلي","سعر البيع","سعر الشراء المسجل","معدل التكلفة الحقيقي","القيمة بمعدل التكلفة","ملاحظة"]];let n=0,TQ=0,TV=0;
+ for(const[s,its]of visible(k)){aoa.push([s]);let sq=0,sv=0;for(const i of its){n++;const w=wac(i);aoa.push([n,i.n,i.m,i.sh,i.ho,i.s,i.sr?Math.round(i.sr):"",Math.round(i.pr),w?Math.round(w):"",Math.round(i.av||0),note(i)]);if(i.s>0){sq+=i.s;sv+=i.av||0}}
+  aoa.push(["","مجموع "+s,"","","",sq,"","","",Math.round(sv),""],[]);TQ+=sq;TV+=sv}
+ aoa.push(["","المجموع الكلي","","","",TQ,"","","",Math.round(TV),""]);
+ const ws=XLSX.utils.aoa_to_sheet(aoa);ws["!cols"]=[5,40,13,10,12,11,13,16,17,18,24].map(w=>({wch:w}));ws["!merges"]=[{s:{r:0,c:0},e:{r:0,c:10}}];
+ const wb=XLSX.utils.book_new();wb.Workbook={Views:[{RTL:true}]};XLSX.utils.book_append_sheet(wb,ws,"Stock");
+ const blob=new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),fn=k+"_stock_"+ds+".xlsx";
+ const d=window.claude?await claude.use("downloads").catch(()=>null):null;
+ if(d){try{await d.save({filename:fn,data:blob})}catch(e){}}else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fn;a.click()}}
+function alertBox(t){const m=document.createElement("div");m.className="msg";m.textContent=t;document.getElementById("app").prepend(m)}
+function route(){const k=location.hash.slice(1);k?brand(k):home();window.scrollTo(0,0)}
+const enc=new TextEncoder(),ub=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function sha(t){return[...new Uint8Array(await crypto.subtle.digest("SHA-256",enc.encode(t)))].map(b=>b.toString(16).padStart(2,"0")).join("")}
+async function gcm(keyBytes,blob){const k=await crypto.subtle.importKey("raw",keyBytes,"AES-GCM",false,["decrypt"]);return new Uint8Array(await crypto.subtle.decrypt({name:"AES-GCM",iv:blob.slice(0,12)},k,blob.slice(12)))}
+async function unwrap(user,pass){const users=await (await fetch("users.json",{cache:"no-store"})).json();const e=users[await sha(user.trim().toLowerCase())];if(!e)throw"bad";
+ const base=await crypto.subtle.importKey("raw",enc.encode(pass),"PBKDF2",false,["deriveBits"]);
+ const kek=new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",salt:ub(e.s),iterations:310000,hash:"SHA-256"},base,256));return gcm(kek,ub(e.w))}
+async function openData(key){const t=await (await fetch("data.enc",{cache:"no-store"})).text();DATA=JSON.parse(new TextDecoder().decode(await gcm(key,ub(t.trim()))));window.onhashchange=route;route();
+ const lo=document.createElement("button");lo.textContent="تسجيل خروج";lo.style.cssText="position:fixed;bottom:14px;left:14px;font-size:12px;padding:6px 10px";lo.onclick=()=>{try{sessionStorage.removeItem("k");localStorage.removeItem("k")}catch(e){}location.hash="";location.reload()};document.body.appendChild(lo)}
+function login(err){document.getElementById("app").innerHTML=`<div class="login"><h1>مخزون <span>صدى البروج</span></h1><div class="sub">للموظفين فقط — سجّل دخولك</div>
+ <form id="lf"><input id="lu" placeholder="اسم المستخدم" autocomplete="username" required><input id="lp" type="password" placeholder="كلمة السر" autocomplete="current-password" required>
+ <label class="rem"><input type="checkbox" id="lr"> تذكرني على هذا الجهاز</label><button class="pri" id="lb">دخول</button>${err?`<div class="msg">${err}</div>`:""}</form></div>`;
+ lf.onsubmit=async e=>{e.preventDefault();lb.disabled=true;lb.textContent="جاري الدخول…";let k;try{k=await unwrap(lu.value,lp.value)}catch(x){return login("اسم المستخدم أو كلمة السر غلط")}
+  const s=btoa(String.fromCharCode(...k));try{(lr.checked?localStorage:sessionStorage).setItem("k",s)}catch(x){}try{await openData(k)}catch(x){login("تعذر تحميل البيانات، حدّث الصفحة.")}}}
+(async()=>{let s=null;try{s=sessionStorage.getItem("k")||localStorage.getItem("k")}catch(e){}
+ if(s){try{await openData(ub(s));return}catch(e){try{sessionStorage.removeItem("k");localStorage.removeItem("k")}catch(x){}}}login()})();
+</script></body></html>
