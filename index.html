@@ -31,7 +31,7 @@ td.w{color:var(--acc);background:var(--accs)}td.note{color:var(--mut);font-size:
 <script>
 const BRANDS=[
  {k:"dahua",t:"Dahua داهوا"},{k:"hik",t:"Hikvision / HiLook"},{k:"ezviz",t:"EZVIZ"},{k:"tprouter",t:"TP-Link راوترات"},{k:"tplink",t:"TP-Link (بقية المنتجات)"},
- {k:"tecsa",t:"TECSA تيكسا"},{k:"power",t:"UPS وبطاريات وطاقة"},{k:"cables",t:"كيبلات واكسسوارات"},{k:"other",t:"مواد أخرى"}];
+ {k:"tecsa",t:"TECSA تيكسا"},{k:"power",t:"UPS وبطاريات"},{k:"energy",t:"الطاقة الكهربائية"},{k:"cables",t:"كيبلات"},{k:"acc",t:"اكسسوارات"},{k:"other",t:"مواد أخرى"}];
 const T=s=>s.toUpperCase().replace(/\s+/g," ");
 function classify(n){const u=T(n);
  if(/TECSA|TCS[-\s\[]|BS-1500/.test(u))return["tecsa",/K\.?B|K0B|KEYBOARD/.test(u)?"كيبوردات":/MOUSE/.test(u)?"ماوسات":/HEAD|SPEAKER|BH2/.test(u)?"سماعات":"أخرى"];
@@ -39,15 +39,15 @@ function classify(n){const u=T(n);
  if(/^THC-|^DVR-2|^IK-|^TK-|^KIT R3104/.test(u))return["hik",/^DVR/.test(u)?"أجهزة تسجيل DVR":/KIT/.test(u)?"كتات":"كاميرات"];
  if(/^CS-|^EZVIZ/.test(u))return["ezviz",/RAM/.test(u)?"ذواكر":"كاميرات"];
  if(/^TL[-\s]|^TP[-\s]?LINK|^TPLINK|ARCHER|DECO|^EAP|^LS1|^SG ?2|^ES2|^RP108|VIG[IE]|^TABO|^NVR ?[12]\d|^NVR1|^TP LINK/.test(u)){const s=tpSec(u);return[s==="راوترات"||s==="Deco"?"tprouter":"tplink",s]}
- if(/^CABLE/.test(u)&&/UPS/.test(u))return["cables","اكسسوارات"];
- if(/UPS|BATT|BATTER|INVERTER|ANVERTER|GROWATT|DEYE|LONG[IL]|GOGO POWER|ADAPTER|ADEPTER|ADPTER|CHARGER|محولة|^5A 12V|^120W|POWER SUPLE|BLITHUM|SENPUTE|MAXMA|POE-UPS|^V500SE/.test(u))return["power",/UPS/.test(u)&&!/BATT/.test(u)?"UPS":/BATT|BLITHUM|SENPUTE|MAXMA/.test(u)?"بطاريات":/INVERTER|ANVERTER|GROWATT|DEYE|LONG|GOGO/.test(u)?"انفرترات وألواح":"أدابترات وشواحن"];
- if(/CABLE|ABLE CAT|^DC|BNC|فيش|BRACKET|BRAKET|ستاند|BOX|بوكس|CONCTER|CONNECTOR|CONERTOR|HDMI|HDML|SPLITER|EXTENDER|^RAK|RACK|كيبل|TOOL CABLE|STS FAST|PLASTIC HOOK|E U PLUG|WI-FI ANTENNA|FAST (BLUE|GREEN)/.test(u))return["cables",/HDMI|HDML|HD |SPLITER|EXTENDER/.test(u)?"HDMI وموسعات":!/CABLE|ABLE CAT/.test(u)?"اكسسوارات":/FTTH|FTHH|FIBER/.test(u)?"كيبلات فايبر":/RG ?59|CAMERA|CAM |CARBON 250|C3$|C3 قظري|CARBON قطري|NEXXT قطري|خشب|خاكي|رصاصي/.test(u)?"كيبلات كاميرات":/^DC|DC /.test(u)?"اكسسوارات":"كيبلات شبكة"];//"HDMI وموسعات":/FTTH|FTHH|FIBER/.test(u)?"كيبلات فايبر":/RG ?59|CAMERA|CAM |CARBON 250|C3$|C3 قظري|CARBON قطري|NEXXT قطري|خشب|خاكي|رصاصي/.test(u)?"كيبلات كاميرات":/CABLE|ABLE/.test(u)&&!/^DC|DC /.test(u)?"كيبلات شبكة":"اكسسوارات"];
+ if(/^CABLE/.test(u)&&/UPS/.test(u))return["acc","اكسسوارات"];
+ if(/UPS|BATT|BATTER|INVERTER|ANVERTER|GROWATT|DEYE|LONG[IL]|GOGO POWER|ADAPTER|ADEPTER|ADPTER|CHARGER|محولة|^5A 12V|^120W|POWER SUPLE|BLITHUM|SENPUTE|MAXMA|POE-UPS|^V500SE/.test(u)){const s=/TUBUL|TUBLAR|LITHIUM|SENPUTE|BLITHUM|\d ?KW/.test(u)&&/BAT|LITH|TUBLAR/.test(u)?"بطاريات طاقة شمسية":/UPS/.test(u)&&!/BATT/.test(u)?"UPS":/BATT|BLITHUM|SENPUTE|MAXMA/.test(u)?"بطاريات":/INVERTER|ANVERTER|GROWATT|DEYE|LONG|GOGO/.test(u)?"انفرترات وألواح":"أدابترات وشواحن";return[s==="انفرترات وألواح"||s==="بطاريات طاقة شمسية"?"energy":"power",s]};
+ if(/CABLE|ABLE CAT|^DC|BNC|فيش|BRACKET|BRAKET|ستاند|BOX|بوكس|CONCTER|CONNECTOR|CONERTOR|HDMI|HDML|SPLITER|EXTENDER|^RAK|RACK|كيبل|TOOL CABLE|STS FAST|PLASTIC HOOK|E U PLUG|WI-FI ANTENNA|FAST (BLUE|GREEN)/.test(u)){const s=/HDMI|HDML|HD |SPLITER|EXTENDER/.test(u)?"HDMI وموسعات":!/CABLE|ABLE CAT/.test(u)?"اكسسوارات":/FTTH|FTHH|FIBER/.test(u)?"كيبلات فايبر":/RG ?59|CAMERA|CAM |CARBON 250|C3$|C3 قظري|CARBON قطري|NEXXT قطري|خشب|خاكي|رصاصي/.test(u)?"كيبلات كاميرات":/^DC|DC /.test(u)?"اكسسوارات":"كيبلات شبكة";return[s.startsWith("كيبلات")?"cables":"acc",s]};//"HDMI وموسعات":/FTTH|FTHH|FIBER/.test(u)?"كيبلات فايبر":/RG ?59|CAMERA|CAM |CARBON 250|C3$|C3 قظري|CARBON قطري|NEXXT قطري|خشب|خاكي|رصاصي/.test(u)?"كيبلات كاميرات":/CABLE|ABLE/.test(u)&&!/^DC|DC /.test(u)?"كيبلات شبكة":"اكسسوارات"];
  return["other",/HARD|HAED|WD |^WD|TOSHIBA|RAM|TF-SD|DOCKING/.test(u)?"هاردات وذواكر":/ONT|ONU|ELYX|UBNT|LAN725/.test(u)?"فايبر وشبكات":"متفرقات"]}
 function dahuaSec(u){if(/KIT/.test(u))return"كتات";if(/NVR/.test(u))return"أجهزة تسجيل NVR";if(/XVR|1B16/.test(u))return"أجهزة تسجيل XVR";
  if(/IPC|IPS|[-\s]IP[-\s]|2449|1249|1549|1639|2649|2849|1839/.test(u))return"كاميرات IP";if(/18\d\d/.test(u))return"كاميرات أنالوك 4K / 8MP";if(/15\d\d/.test(u))return"كاميرات أنالوك 5MP";return"كاميرات أنالوك 2MP"}
 function tpSec(u){if(/VIG|^NVR/.test(u))return"VIGI كاميرات وتسجيل";if(/DECO/.test(u))return"Deco";if(/^EAP/.test(u))return"Access Point (EAP)";
  if(/WA8|RE ?8|EXTENDER/.test(u))return"مقويات";if(/^TL-S|^LS1|^SG|^ES2|^RP108|TL -1009/.test(u))return"سويجات";if(/TABO/.test(u))return"أخرى";return"راوترات"}
-const SORD={tprouter:["راوترات","Deco"],tplink:["سويجات","Access Point (EAP)","VIGI كاميرات وتسجيل","مقويات"],dahua:["كاميرات أنالوك 2MP","كاميرات أنالوك 5MP","كاميرات أنالوك 4K / 8MP","كاميرات IP","كتات","أجهزة تسجيل XVR","أجهزة تسجيل NVR"]};
+const SORD={energy:["انفرترات وألواح","بطاريات طاقة شمسية"],power:["UPS","بطاريات","أدابترات وشواحن"],cables:["كيبلات شبكة","كيبلات كاميرات","كيبلات فايبر"],tprouter:["راوترات","Deco"],tplink:["سويجات","Access Point (EAP)","VIGI كاميرات وتسجيل","مقويات"],dahua:["كاميرات أنالوك 2MP","كاميرات أنالوك 5MP","كاميرات أنالوك 4K / 8MP","كاميرات IP","كتات","أجهزة تسجيل XVR","أجهزة تسجيل NVR"]};
 const fmt=v=>v==null||isNaN(v)?"—":Math.round(v).toLocaleString("en-US");
 let DATA=null,showZero=false,q="";
 const wac=i=>i.s>0&&i.av>0?i.av/i.s:null;
